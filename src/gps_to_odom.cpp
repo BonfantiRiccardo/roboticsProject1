@@ -82,7 +82,7 @@ public:
 		messaggio.pose.pose.position.y = ENU(1, 0);
 		messaggio.pose.pose.position.z = ENU(2, 0);
 
-		//messaggio.x = //...
+		// orientation don't know how to calculate it
 	}
 
 	void callback1(const ros::TimerEvent&) {
