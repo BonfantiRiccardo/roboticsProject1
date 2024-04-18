@@ -54,14 +54,13 @@ public:
 		// to ECEF
 		double latitude = toRadians(msg->latitude);
 		double longitude = toRadians(msg->longitude);
-		double altitude = toRadians(msg->altitude);
+		double altitude = msg->altitude;
 		
 		Eigen::Vector3d ECEF = toECEF(latitude, longitude, altitude);
 
 		reference_latitude = toRadians(reference_latitude);
 		reference_longitude = toRadians(reference_longitude);
-		reference_altitude = toRadians(reference_altitude);
-
+		
 		Eigen::Vector3d ECEF_reference = toECEF(reference_latitude, reference_longitude, reference_altitude);
 
 		// to ENU
