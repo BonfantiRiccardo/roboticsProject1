@@ -17,9 +17,11 @@ private:
 
 	ros::Timer timer;			//si può togliere se  facciamo publishing a hertz fissati (controllare se il subscriber legge a hertz fissati con comando)
 
-	double reference_latitude = 45.477669461666665;
-	double reference_longitude = 9.22674018;
-	double reference_altitude = 169.039;
+	double reference_latitude;
+	double reference_longitude;
+	double reference_altitude;
+
+	Eigen::Vector3d ECEF_reference;
 
 	double toRadians(double degrees) {
 		return degrees * M_PI / 180;
@@ -46,6 +48,15 @@ public:
   		sub = n.subscribe("/fix", 1, &pub_sub::callback, this);
 		pub = n.advertise<nav_msgs::Odometry>("/gps_odom", 1);
 		timer = n.createTimer(ros::Duration(0.2), &pub_sub::callback1, this);
+
+
+		n.getParam("reference_latitude", reference_latitude);
+		n.getParam("reference_longitude", reference_longitude);
+		n.getParam("reference_altitude", reference_altitude);
+
+		reference_latitude = toRadians(reference_latitude);
+		reference_longitude = toRadians(reference_longitude);
+		ECEF_reference = toECEF(reference_latitude, reference_longitude, reference_altitude);
 	}
 
 	void callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
@@ -55,13 +66,16 @@ public:
 		double latitude = toRadians(msg->latitude);
 		double longitude = toRadians(msg->longitude);
 		double altitude = msg->altitude;
+
+		ROS_INFO("latitude: %f, longitude: %f, altitude: %f", msg->latitude, msg->longitude, msg->altitude);
+
+		ROS_INFO("reference_latitude: %f, reference_longitude: %f, reference_altitude: %f", reference_latitude, reference_longitude, reference_altitude);
 		
 		Eigen::Vector3d ECEF = toECEF(latitude, longitude, altitude);
 
-		reference_latitude = toRadians(reference_latitude);
-		reference_longitude = toRadians(reference_longitude);
-		
-		Eigen::Vector3d ECEF_reference = toECEF(reference_latitude, reference_longitude, reference_altitude);
+		ROS_INFO("ECEF: %f, %f, %f", ECEF(0, 0), ECEF(1, 0), ECEF(2, 0));
+
+		ROS_INFO("ECEF_reference: %f, %f, %f", ECEF_reference(0, 0), ECEF_reference(1, 0), ECEF_reference(2, 0));
 
 		// to ENU
 		Eigen::Vector3d vector1 = ECEF - ECEF_reference;
@@ -73,6 +87,8 @@ public:
 		cos(reference_latitude) * cos(reference_longitude), cos(reference_latitude) * sin(reference_longitude), sin(reference_latitude);
 
 		Eigen::MatrixXd ENU = matrix2 * vector1;
+
+		ROS_INFO("ENU: %f, %f, %f", ENU(0, 0), ENU(1, 0), ENU(2, 0));
 
 		messaggio.pose.pose.position.x = ENU(0, 0);
 		messaggio.pose.pose.position.y = ENU(1, 0);
@@ -93,6 +109,7 @@ public:
 int main(int argc, char **argv){
 
 	ros::init(argc, argv, "gps_to_odom");
+
 
 	pub_sub my_pub_sub;
 	ros::spin();
