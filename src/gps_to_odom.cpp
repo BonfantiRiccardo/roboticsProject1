@@ -17,9 +17,9 @@ private:
 
 	ros::Timer timer;			//si può togliere se  facciamo publishing a hertz fissati (controllare se il subscriber legge a hertz fissati con comando)
 
-	double reference_latitude = 45;
-	double reference_longitude = 9;
-	double reference_altitude = 169;
+	double reference_latitude = 45.477669461666665;
+	double reference_longitude = 9.22674018;
+	double reference_altitude = 169.039;
 
 	double toRadians(double degrees) {
 		return degrees * M_PI / 180;
