@@ -21,6 +21,15 @@ private:
 	double reference_longitude;
 	double reference_altitude;
 
+	double previous_latitude;
+	double previous_longitude;
+
+	double previous_ENU_x;
+	double previous_ENU_y;
+	double previous_ENU_z;
+
+	double previous_time;
+
 	Eigen::Vector3d ECEF_reference;
 
 	double toRadians(double degrees) {
@@ -43,6 +52,35 @@ private:
 		return ECEF;
 	}
 
+	double calculate_gps_heading(double lat1, double lon1, double lat2, double lon2) {
+		double dlon = lon2 - lon1;
+		double x = cos(lat2) * sin(dlon);
+		double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dlon);
+
+		double heading = atan2(x, y);
+
+		return heading;
+
+	}
+
+	Eigen::Vector4d toQuaternion(double roll, double pitch, double yaw) {
+		double cr = cos(roll * 0.5);
+		double sr = sin(roll * 0.5);
+		double cp = cos(pitch * 0.5);
+		double sp = sin(pitch * 0.5);
+		double cy = cos(yaw * 0.5);
+		double sy = sin(yaw * 0.5);
+
+		Eigen::Vector4d quaternion;
+		quaternion << 
+		sr * cp * cy - cr * sp * sy, // x
+		cr * sp * cy + sr * cp * sy, // y
+		cr * cp * sy - sr * sp * cy, // z
+		cr * cp * cy + sr * sp * sy; // w
+
+		return quaternion;
+	}
+
 public:
   	pub_sub() {
   		sub = n.subscribe("/fix", 1, &pub_sub::callback, this);
@@ -54,9 +92,17 @@ public:
 		n.getParam("reference_longitude", reference_longitude);
 		n.getParam("reference_altitude", reference_altitude);
 
+
 		reference_latitude = toRadians(reference_latitude);
 		reference_longitude = toRadians(reference_longitude);
 		ECEF_reference = toECEF(reference_latitude, reference_longitude, reference_altitude);
+
+		previous_latitude = reference_latitude;
+		previous_longitude = reference_longitude;
+
+		previous_ENU_x = 0;
+		previous_ENU_y = 0;
+		previous_ENU_z = 0;
 	}
 
 	void callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
@@ -94,7 +140,37 @@ public:
 		messaggio.pose.pose.position.y = ENU(1, 0);
 		messaggio.pose.pose.position.z = ENU(2, 0);
 
-		// orientation don't know how to calculate it
+		// estimate orientation
+
+		// delta time from NatSavFix
+
+		// velocity
+		double velocity_x = (ENU(0, 0) - previous_ENU_x) / 0.2;
+		double velocity_y = (ENU(1, 0) - previous_ENU_y) / 0.2;
+		double velocity_z = (ENU(2, 0) - previous_ENU_z) / 0.2;
+
+		messaggio.twist.twist.linear.x = velocity_x;
+		messaggio.twist.twist.linear.y = velocity_y;
+		messaggio.twist.twist.linear.z = velocity_z;
+
+		previous_ENU_x = ENU(0, 0);
+		previous_ENU_y = ENU(1, 0);
+		previous_ENU_z = ENU(2, 0);
+		
+		// yaw
+		double heading = calculate_gps_heading(previous_latitude, previous_longitude, latitude, longitude);
+
+		// quaternion
+		Eigen::Vector4d quaternion = toQuaternion(0, 0, heading);
+
+		messaggio.pose.pose.orientation.x = quaternion(0, 0);
+		messaggio.pose.pose.orientation.y = quaternion(1, 0);
+		messaggio.pose.pose.orientation.z = quaternion(2, 0);
+		messaggio.pose.pose.orientation.w = quaternion(3, 0);
+
+		previous_latitude = latitude;
+		previous_longitude = longitude;
+
 	}
 
 	void callback1(const ros::TimerEvent&) {
