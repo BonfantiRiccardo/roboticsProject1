@@ -21,12 +21,7 @@ private:
 	double reference_longitude;
 	double reference_altitude;
 
-	double previous_latitude;
-	double previous_longitude;
-
-	double previous_ENU_x;
-	double previous_ENU_y;
-	double previous_ENU_z;
+	Eigen::Vector3d previous_ENU;
 
 	double previous_time;
 
@@ -52,15 +47,12 @@ private:
 		return ECEF;
 	}
 
-	double calculate_gps_heading(double lat1, double lon1, double lat2, double lon2) {
-		double dlon = lon2 - lon1;
-		double x = cos(lat2) * sin(dlon);
-		double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dlon);
+	double calculate_gps_heading(Eigen::Vector3d previous, Eigen::Vector3d current) {
+		Eigen::Vector3d delta = current - previous;
 
-		double heading = atan2(x, y);
+		double heading = atan2(delta(0, 0), delta(1, 0));
 
 		return heading;
-
 	}
 
 	Eigen::Vector4d toQuaternion(double roll, double pitch, double yaw) {
@@ -81,6 +73,18 @@ private:
 		return quaternion;
 	}
 
+	Eigen::Vector3d rotateOnZAxis(Eigen::Vector3d vector, double angle) {
+		Eigen::Matrix3d matrix;
+		matrix << 
+		cos(angle), -sin(angle), 0,
+		sin(angle), cos(angle), 0,
+		0, 0, 1;
+
+		Eigen::Vector3d rotated = matrix * vector;
+
+		return rotated;
+	}
+
 public:
   	pub_sub() {
   		sub = n.subscribe("/fix", 1, &pub_sub::callback, this);
@@ -97,12 +101,9 @@ public:
 		reference_longitude = toRadians(reference_longitude);
 		ECEF_reference = toECEF(reference_latitude, reference_longitude, reference_altitude);
 
-		previous_latitude = reference_latitude;
-		previous_longitude = reference_longitude;
+		previous_ENU << 0, 0, 0;
 
-		previous_ENU_x = 0;
-		previous_ENU_y = 0;
-		previous_ENU_z = 0;
+		
 	}
 
 	void callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
@@ -124,7 +125,7 @@ public:
 		ROS_INFO("ECEF_reference: %f, %f, %f", ECEF_reference(0, 0), ECEF_reference(1, 0), ECEF_reference(2, 0));
 
 		// to ENU
-		Eigen::Vector3d vector1 = ECEF - ECEF_reference;
+		Eigen::Vector3d deltaECEF = ECEF - ECEF_reference;
 
 		Eigen::Matrix3d matrix2;
 		matrix2 << 
@@ -132,7 +133,10 @@ public:
 		-sin(reference_latitude) * cos(reference_longitude), -sin(reference_latitude) * sin(reference_longitude), cos(reference_latitude),
 		cos(reference_latitude) * cos(reference_longitude), cos(reference_latitude) * sin(reference_longitude), sin(reference_latitude);
 
-		Eigen::MatrixXd ENU = matrix2 * vector1;
+		Eigen::Vector3d ENU = matrix2 * deltaECEF;
+
+		// rotate on Z axis by 130 degrees
+		ENU = rotateOnZAxis(ENU, toRadians(130));
 
 		ROS_INFO("ENU: %f, %f, %f", ENU(0, 0), ENU(1, 0), ENU(2, 0));
 
@@ -140,25 +144,21 @@ public:
 		messaggio.pose.pose.position.y = ENU(1, 0);
 		messaggio.pose.pose.position.z = ENU(2, 0);
 
-		// estimate orientation
+		// // velocity
+		// double velocity_x = (ENU(0, 0) - previous_ENU_x) / 0.2;
+		// double velocity_y = (ENU(1, 0) - previous_ENU_y) / 0.2;
+		// double velocity_z = (ENU(2, 0) - previous_ENU_z) / 0.2;
 
-		// delta time from NatSavFix
+		// messaggio.twist.twist.linear.x = abs(velocity_x);
+		// messaggio.twist.twist.linear.y = abs(velocity_y);
+		// messaggio.twist.twist.linear.z = abs(velocity_z);
 
-		// velocity
-		double velocity_x = (ENU(0, 0) - previous_ENU_x) / 0.2;
-		double velocity_y = (ENU(1, 0) - previous_ENU_y) / 0.2;
-		double velocity_z = (ENU(2, 0) - previous_ENU_z) / 0.2;
-
-		messaggio.twist.twist.linear.x = velocity_x;
-		messaggio.twist.twist.linear.y = velocity_y;
-		messaggio.twist.twist.linear.z = velocity_z;
-
-		previous_ENU_x = ENU(0, 0);
-		previous_ENU_y = ENU(1, 0);
-		previous_ENU_z = ENU(2, 0);
+		// previous_ENU_x = ENU(0, 0);
+		// previous_ENU_y = ENU(1, 0);
+		// previous_ENU_z = ENU(2, 0);
 		
 		// yaw
-		double heading = calculate_gps_heading(previous_latitude, previous_longitude, latitude, longitude);
+		double heading = calculate_gps_heading(previous_ENU, ENU);
 
 		// quaternion
 		Eigen::Vector4d quaternion = toQuaternion(0, 0, heading);
@@ -168,8 +168,7 @@ public:
 		messaggio.pose.pose.orientation.z = quaternion(2, 0);
 		messaggio.pose.pose.orientation.w = quaternion(3, 0);
 
-		previous_latitude = latitude;
-		previous_longitude = longitude;
+		previous_ENU = ENU;
 
 	}
 
