@@ -23,8 +23,6 @@ private:
 
 	Eigen::Vector3d previous_ENU;
 
-	double previous_time;
-
 	Eigen::Vector3d ECEF_reference;
 
 	double toRadians(double degrees) {
@@ -42,6 +40,7 @@ private:
 		double z = (nConstant * (1 - eUp2) + altitude) * sin(latitude);
 
 		Eigen::Vector3d ECEF;
+
 		ECEF << x, y, z;
 
 		return ECEF;
@@ -64,6 +63,7 @@ private:
 		double sy = sin(yaw * 0.5);
 
 		Eigen::Vector4d quaternion;
+
 		quaternion << 
 		sr * cp * cy - cr * sp * sy, // x
 		cr * sp * cy + sr * cp * sy, // y
@@ -77,6 +77,7 @@ private:
 
 	Eigen::Vector3d rotateOnZAxis(Eigen::Vector3d vector, double angle) {
 		Eigen::Matrix3d matrix;
+
 		matrix << 
 		cos(angle), -sin(angle), 0,
 		sin(angle), cos(angle), 0,
@@ -130,7 +131,7 @@ public:
 		Eigen::Vector3d deltaECEF = ECEF - ECEF_reference;
 
 		Eigen::Matrix3d matrix2;
-		
+
 		matrix2 << 
 		-sin(reference_longitude), cos(reference_longitude), 0,
 		-sin(reference_latitude) * cos(reference_longitude), -sin(reference_latitude) * sin(reference_longitude), cos(reference_latitude),
