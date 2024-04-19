@@ -70,6 +70,8 @@ private:
 		cr * cp * sy - sr * sp * cy, // z
 		cr * cp * cy + sr * sp * sy; // w
 
+		quaternion.normalize();
+
 		return quaternion;
 	}
 
@@ -128,6 +130,7 @@ public:
 		Eigen::Vector3d deltaECEF = ECEF - ECEF_reference;
 
 		Eigen::Matrix3d matrix2;
+		
 		matrix2 << 
 		-sin(reference_longitude), cos(reference_longitude), 0,
 		-sin(reference_latitude) * cos(reference_longitude), -sin(reference_latitude) * sin(reference_longitude), cos(reference_latitude),
@@ -169,7 +172,6 @@ public:
 		messaggio.pose.pose.orientation.w = quaternion(3, 0);
 
 		previous_ENU = ENU;
-
 	}
 
 	void callback1(const ros::TimerEvent&) {
