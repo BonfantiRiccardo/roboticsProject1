@@ -3,6 +3,7 @@
 #include "sensor_msgs/NavSatFix.h"
 #include "eigen3/Eigen/Dense"
 #include <cmath>
+#include <complex>
 
 class pub_sub {
 
@@ -46,7 +47,7 @@ private:
 		return ECEF;
 	}
 
-	double calculate_gps_heading(Eigen::Vector3d previous, Eigen::Vector3d current) {
+	double calculateHeadingFromGPS(Eigen::Vector3d previous, Eigen::Vector3d current) {
 		Eigen::Vector3d delta = current - previous;
 
 		double heading = atan2(delta(0, 0), delta(1, 0));
@@ -69,6 +70,19 @@ private:
 		cr * sp * cy + sr * cp * sy, // y
 		cr * cp * sy - sr * sp * cy, // z
 		cr * cp * cy + sr * sp * sy; // w
+
+		quaternion.normalize();
+
+		return quaternion;
+	}
+
+	Eigen::Vector4d toQuaternionOnZAxis(double angle) {
+		double w = cos(angle / 2);
+		double z = sin(angle / 2);
+
+		Eigen::Vector4d quaternion;
+
+		quaternion << 0, 0, z, w;
 
 		quaternion.normalize();
 
@@ -130,14 +144,15 @@ public:
 		// to ENU
 		Eigen::Vector3d deltaECEF = ECEF - ECEF_reference;
 
-		Eigen::Matrix3d matrix2;
+		Eigen::Matrix3d transformMatrix;
 
-		matrix2 << 
+		transformMatrix << 
 		-sin(reference_longitude), cos(reference_longitude), 0,
 		-sin(reference_latitude) * cos(reference_longitude), -sin(reference_latitude) * sin(reference_longitude), cos(reference_latitude),
 		cos(reference_latitude) * cos(reference_longitude), cos(reference_latitude) * sin(reference_longitude), sin(reference_latitude);
 
-		Eigen::Vector3d ENU = matrix2 * deltaECEF;
+		Eigen::Vector3d ENU = transformMatrix * deltaECEF;
+		
 
 		// rotate on Z axis by 130 degrees
 		ENU = rotateOnZAxis(ENU, toRadians(130));
@@ -147,6 +162,21 @@ public:
 		messaggio.pose.pose.position.x = ENU(0, 0);
 		messaggio.pose.pose.position.y = ENU(1, 0);
 		messaggio.pose.pose.position.z = ENU(2, 0);
+
+		// yaw
+		double heading = calculateHeadingFromGPS(previous_ENU, ENU);
+
+		heading = heading - toRadians(130);
+
+		// quaternion
+		Eigen::Vector4d quaternion = toQuaternionOnZAxis(heading);
+
+		messaggio.pose.pose.orientation.x = quaternion(0, 0);
+		messaggio.pose.pose.orientation.y = quaternion(1, 0);
+		messaggio.pose.pose.orientation.z = quaternion(2, 0);
+		messaggio.pose.pose.orientation.w = quaternion(3, 0);
+
+		previous_ENU = ENU;
 
 		// // velocity
 		// double velocity_x = (ENU(0, 0) - previous_ENU_x) / 0.2;
@@ -160,19 +190,6 @@ public:
 		// previous_ENU_x = ENU(0, 0);
 		// previous_ENU_y = ENU(1, 0);
 		// previous_ENU_z = ENU(2, 0);
-		
-		// yaw
-		double heading = calculate_gps_heading(previous_ENU, ENU);
-
-		// quaternion
-		Eigen::Vector4d quaternion = toQuaternion(0, 0, heading);
-
-		messaggio.pose.pose.orientation.x = quaternion(0, 0);
-		messaggio.pose.pose.orientation.y = quaternion(1, 0);
-		messaggio.pose.pose.orientation.z = quaternion(2, 0);
-		messaggio.pose.pose.orientation.w = quaternion(3, 0);
-
-		previous_ENU = ENU;
 	}
 
 	void callback1(const ros::TimerEvent&) {
