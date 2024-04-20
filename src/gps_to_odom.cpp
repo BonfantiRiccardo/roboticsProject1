@@ -2,8 +2,9 @@
 #include "nav_msgs/Odometry.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "eigen3/Eigen/Dense"
+#include "eigen3/Eigen/Geometry"
+#include "tf/transform_datatypes.h"
 #include <cmath>
-#include <complex>
 
 class pub_sub {
 
@@ -50,43 +51,9 @@ private:
 	double calculateHeadingFromGPS(Eigen::Vector3d previous, Eigen::Vector3d current) {
 		Eigen::Vector3d delta = current - previous;
 
-		double heading = atan2(delta(0, 0), delta(1, 0));
+		double heading = atan2(delta(1, 0), delta(0, 0));
 
 		return heading;
-	}
-
-	Eigen::Vector4d toQuaternion(double roll, double pitch, double yaw) {
-		double cr = cos(roll * 0.5);
-		double sr = sin(roll * 0.5);
-		double cp = cos(pitch * 0.5);
-		double sp = sin(pitch * 0.5);
-		double cy = cos(yaw * 0.5);
-		double sy = sin(yaw * 0.5);
-
-		Eigen::Vector4d quaternion;
-
-		quaternion << 
-		sr * cp * cy - cr * sp * sy, // x
-		cr * sp * cy + sr * cp * sy, // y
-		cr * cp * sy - sr * sp * cy, // z
-		cr * cp * cy + sr * sp * sy; // w
-
-		quaternion.normalize();
-
-		return quaternion;
-	}
-
-	Eigen::Vector4d toQuaternionOnZAxis(double angle) {
-		double w = cos(angle / 2);
-		double z = sin(angle / 2);
-
-		Eigen::Vector4d quaternion;
-
-		quaternion << 0, 0, z, w;
-
-		quaternion.normalize();
-
-		return quaternion;
 	}
 
 	Eigen::Vector3d rotateOnZAxis(Eigen::Vector3d vector, double angle) {
@@ -101,6 +68,7 @@ private:
 
 		return rotated;
 	}
+
 
 public:
   	pub_sub() {
@@ -166,15 +134,13 @@ public:
 		// yaw
 		double heading = calculateHeadingFromGPS(previous_ENU, ENU);
 
-		heading = heading - toRadians(130);
-
 		// quaternion
-		Eigen::Vector4d quaternion = toQuaternionOnZAxis(heading);
-
-		messaggio.pose.pose.orientation.x = quaternion(0, 0);
-		messaggio.pose.pose.orientation.y = quaternion(1, 0);
-		messaggio.pose.pose.orientation.z = quaternion(2, 0);
-		messaggio.pose.pose.orientation.w = quaternion(3, 0);
+		tf::Quaternion q;
+		q.setRPY(0, 0, heading);
+		messaggio.pose.pose.orientation.x = q.x();
+		messaggio.pose.pose.orientation.y = q.y();
+		messaggio.pose.pose.orientation.z = q.z();
+		messaggio.pose.pose.orientation.w = q.w();
 
 		previous_ENU = ENU;
 
