@@ -18,6 +18,5 @@ In particolare ho notato che nel periodo 120s-230s della bag sono molto diversi 
 Dopo i 230s tornano a muoversi in modo simile anche se in posizioni abbastanza diverse, dopodiché dai 350s in poi divergono un'altra volta.
 
 # TODO
-
 - [Terzo nodo]
 - [Eventualmente sistemare primo nodo]
