@@ -4,6 +4,8 @@
 					 		  rosbag play --clock --pause robotics.bag
 --> in un altro pannello lanciare: roslaunch first_package launch.launch
 --> tornare al pannello della bag e clickare spazio per farla partire
+
+//DA QUI IN POI SUPERFLUO, DOVREBBE ESSERE GIà TUTTO IMPOSTATO GRAZIE AL CONFIG FILE
 --> aprire la vnc (localhost:8080), dovrebbe già essersi aperto rviz e dovrebbe essere già settato in alto a sinistra il fixed frame a "world".
 --> Clickare in basso a destra su add, scrollare fino in fondo e clickare su tf
 --> nel pannello di destra in alto selezionare Type: TopDownOrtho (rviz)

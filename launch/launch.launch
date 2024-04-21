@@ -21,5 +21,5 @@
         </node>
     </group>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-f world"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-f world -d $(find first_project)/cfg/rviz_config.rviz"/>
 </launch>
