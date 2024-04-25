@@ -28,18 +28,19 @@ public:
 
 		//is 1 good for the queue lenght?
 		sub = nh.subscribe("/os_cloud_node/points", 1, &pub_sub::callback, this);
+		pub = nh.advertise<sensor_msgs::PointCloud2>("/pointcloud_remapped", 1);
 
 
 	}
 
 	void callback(const sensor_msgs::PointCloud2::ConstPtr& msg){
 		ROS_INFO("FRAME: %s", msg->header.frame_id.c_str());
-		currentFrame = msg->header.frame_id.c_str();
-		//TODO
+		
 	}
 
 	void callback1(first_project::parametersConfig &config, uint32_t level){
 		ROS_INFO("Reconficure request: %s", config.frame_id.c_str());
+		currentFrame = config.frame_id.c_str();
 	}
 
 };
