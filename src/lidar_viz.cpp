@@ -6,6 +6,12 @@
 
 
 class pub_sub{
+
+	//Maybe it has to be initialized
+	std::string currentFrame;
+
+	sensor_msgs::PointCloud2 messaggio;
+
 private:
 
 	ros::NodeHandle nh;
@@ -15,8 +21,6 @@ private:
 
 public:
 
-	//Maybe it has to be initialized
-	std::string currentFrame;
 
 	pub_sub(){
 
@@ -34,8 +38,15 @@ public:
 	}
 
 	void callback(const sensor_msgs::PointCloud2::ConstPtr& msg){
-		ROS_INFO("FRAME: %s", msg->header.frame_id.c_str());
-		
+		ROS_INFO("FRAME before: %s", msg->header.frame_id.c_str());
+		//potrei dover creare una copia del msg
+		//msg->header.frame_id = this->currentFrame;
+
+		messaggio = *msg;
+		messaggio.header.frame_id = this->currentFrame;
+		ROS_INFO("FRAME after: %s", messaggio.header.frame_id.c_str());
+
+		pub.publish(msg);
 	}
 
 	void callback1(first_project::parametersConfig &config, uint32_t level){
