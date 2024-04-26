@@ -17,7 +17,7 @@ private:
 
 	ros::Publisher pub;
 
-	ros::Timer timer;			//si può togliere se  facciamo publishing a hertz fissati (controllare se il subscriber legge a hertz fissati con comando)
+	ros::Timer timer;
 
 	double reference_latitude;
 	double reference_longitude;
@@ -59,7 +59,7 @@ private:
 	Eigen::Vector3d rotateOnZAxis(Eigen::Vector3d vector, double angle) {
 		Eigen::Matrix3d matrix;
 
-		matrix << 
+		matrix <<
 		cos(angle), -sin(angle), 0,
 		sin(angle), cos(angle), 0,
 		0, 0, 1;
@@ -88,7 +88,7 @@ public:
 
 		previous_ENU << 0, 0, 0;
 
-		
+
 	}
 
 	void callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
@@ -102,7 +102,7 @@ public:
 		ROS_INFO("latitude: %f, longitude: %f, altitude: %f", msg->latitude, msg->longitude, msg->altitude);
 
 		ROS_INFO("reference_latitude: %f, reference_longitude: %f, reference_altitude: %f", reference_latitude, reference_longitude, reference_altitude);
-		
+
 		Eigen::Vector3d ECEF = toECEF(latitude, longitude, altitude);
 
 		ROS_INFO("ECEF: %f, %f, %f", ECEF(0, 0), ECEF(1, 0), ECEF(2, 0));
@@ -114,13 +114,13 @@ public:
 
 		Eigen::Matrix3d transformMatrix;
 
-		transformMatrix << 
+		transformMatrix <<
 		-sin(reference_longitude), cos(reference_longitude), 0,
 		-sin(reference_latitude) * cos(reference_longitude), -sin(reference_latitude) * sin(reference_longitude), cos(reference_latitude),
 		cos(reference_latitude) * cos(reference_longitude), cos(reference_latitude) * sin(reference_longitude), sin(reference_latitude);
 
 		Eigen::Vector3d ENU = transformMatrix * deltaECEF;
-		
+
 
 		// rotate on Z axis by 130 degrees
 		ENU = rotateOnZAxis(ENU, toRadians(130));
