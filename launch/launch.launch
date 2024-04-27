@@ -5,8 +5,10 @@
     <param name="reference_altitude" type="double" value="169.039" />
     <node pkg="first_project" type="gps_to_odom" name="gps_to_odom" output="screen" />
 
+
+    <param name="root_frame" type="string" value="world" />
+
     <group ns="odom_to_tf1">
-        <param name="root_frame" type="string" value="world" />
         <param name="child_frame" type="string" value="wheel_odom" />
         <node pkg="first_project" type="odom_to_tf" name="odom_to_tf" output="screen">
             <remap from="/input_odom" to="/odom"/>
@@ -14,12 +16,19 @@
     </group>
 
     <group ns="odom_to_tf2">
-        <param name="root_frame" type="string" value="world" />
         <param name="child_frame" type="string" value="gps_odom" />
         <node pkg="first_project" type="odom_to_tf" name="odom_to_tf" output="screen">
             <remap from="/input_odom" to="/gps_odom"/>
         </node>
     </group>
 
+
+    <node pkg="first_project" type="lidar_remap" name="lidar_remap" output="screen" />
+
+
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
+
     <node name="rviz" pkg="rviz" type="rviz" args="-f world -d $(find first_project)/cfg/rviz_config.rviz"/>
+
+    <node name="rqt_tf_tree" pkg="rqt_tf_tree" type="rqt_tf_tree" />
 </launch>

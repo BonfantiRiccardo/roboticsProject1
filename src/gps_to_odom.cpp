@@ -160,8 +160,6 @@ public:
 
 	void callback1(const ros::TimerEvent&) {
 		pub.publish(messaggio);
-
-  		ROS_INFO("Callback 1 triggered");
 	}
 
 };

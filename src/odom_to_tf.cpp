@@ -18,7 +18,7 @@ public:
         tf::Transform transform;
         transform.setOrigin( tf::Vector3(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z) );
         transform.setRotation( tf::Quaternion(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w));
-        br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), root_frame, child_frame));
+        br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, root_frame, child_frame));
     }
 
 private:
