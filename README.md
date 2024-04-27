@@ -1,11 +1,10 @@
 # Nota sulla visualizzazione
-Eseguire tutti i nodi e i tool grafici è sufficiente scrivere il comando:
-`roslaunch first_project launch.launch`
+Eseguire tutti i nodi e i tool grafici è sufficiente scrivere il comando:</br>
+`roslaunch first_project launch.launch`</br>
 Tuttavia, nel caso in cui non sia ancora stato eseguito il comando che avvia la riproduzione della bag, il tf_tree risulterà vuoto.
 
-Il comando per eseguire la bag è il seguente:
-`rosbag play --clock robotics.bag`
-
+Il comando per eseguire la bag è il seguente:</br>
+`rosbag play --clock robotics.bag`</br>
 Dopo che viene eseguito questo comando è possibile visualizzare in rviz i movimenti dei diversi reference frames uno rispetto all'altro.
 È inoltre possibile riconfigurare dinamicamente il reference frame del pointcloud da wheel_odom a gps_odom.
 Infine, per visualizzare il tf_tree potrebbe essere necessario "refreshare" l'interfaccia tramite il simbolo delle frecce in alto a sinistra.
