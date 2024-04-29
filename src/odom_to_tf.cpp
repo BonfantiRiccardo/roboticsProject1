@@ -7,14 +7,14 @@ public:
   	tf_sub_pub() {
         n.getParam("root_frame", root_frame);
         n.getParam("child_frame", child_frame);
-        ROS_INFO("Root frame: %s, child frame: %s", root_frame.c_str(), child_frame.c_str());
+        //ROS_INFO("Root frame: %s, child frame: %s", root_frame.c_str(), child_frame.c_str());
   	    sub = n.subscribe("/input_odom", 1000, &tf_sub_pub::callback, this);
     }
 
 
     void callback(const nav_msgs::Odometry::ConstPtr& msg){
-        ROS_INFO("MSG POSE: %f, %f, %f", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
-        ROS_INFO("MSG ORIENT: %f, %f, %f, %f", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
+        //ROS_INFO("MSG POSE: %f, %f, %f", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+        //ROS_INFO("MSG ORIENT: %f, %f, %f, %f", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
         tf::Transform transform;
         transform.setOrigin( tf::Vector3(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z) );
         transform.setRotation( tf::Quaternion(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w));

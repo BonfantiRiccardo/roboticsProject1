@@ -23,7 +23,7 @@ public:
 	}
 
 	void callback(const sensor_msgs::PointCloud2::ConstPtr& msg){
-		ROS_INFO("Current frame parameter: %s", currentFrame.c_str());
+		//ROS_INFO("Current frame parameter: %s", currentFrame.c_str());
 
 		messaggio = *msg;
 
@@ -33,7 +33,7 @@ public:
 	}
 
 	void configCallback(first_project::parametersConfig &config, uint32_t level){
-		ROS_INFO("Reconficure request: %s", config.frame_id.c_str());
+		//ROS_INFO("Reconficure request: %s", config.frame_id.c_str());
 		nh.setParam("currentFrame", config.frame_id.c_str());
 
 		nh.getParam("currentFrame", currentFrame);

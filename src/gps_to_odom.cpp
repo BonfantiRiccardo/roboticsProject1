@@ -74,7 +74,6 @@ public:
   	pub_sub() {
   		sub = n.subscribe("/fix", 1, &pub_sub::callback, this);
 		pub = n.advertise<nav_msgs::Odometry>("/gps_odom", 1);
-		timer = n.createTimer(ros::Duration(0.2), &pub_sub::callback1, this);
 
 
 		n.getParam("reference_latitude", reference_latitude);
@@ -99,15 +98,15 @@ public:
 		double longitude = toRadians(msg->longitude);
 		double altitude = msg->altitude;
 
-		ROS_INFO("latitude: %f, longitude: %f, altitude: %f", msg->latitude, msg->longitude, msg->altitude);
+		//ROS_INFO("latitude: %f, longitude: %f, altitude: %f", msg->latitude, msg->longitude, msg->altitude);
 
-		ROS_INFO("reference_latitude: %f, reference_longitude: %f, reference_altitude: %f", reference_latitude, reference_longitude, reference_altitude);
+		//ROS_INFO("reference_latitude: %f, reference_longitude: %f, reference_altitude: %f", reference_latitude, reference_longitude, reference_altitude);
 
 		Eigen::Vector3d ECEF = toECEF(latitude, longitude, altitude);
 
-		ROS_INFO("ECEF: %f, %f, %f", ECEF(0, 0), ECEF(1, 0), ECEF(2, 0));
+		//ROS_INFO("ECEF: %f, %f, %f", ECEF(0, 0), ECEF(1, 0), ECEF(2, 0));
 
-		ROS_INFO("ECEF_reference: %f, %f, %f", ECEF_reference(0, 0), ECEF_reference(1, 0), ECEF_reference(2, 0));
+		//ROS_INFO("ECEF_reference: %f, %f, %f", ECEF_reference(0, 0), ECEF_reference(1, 0), ECEF_reference(2, 0));
 
 		// to ENU
 		Eigen::Vector3d deltaECEF = ECEF - ECEF_reference;
@@ -125,7 +124,7 @@ public:
 		// rotate on Z axis by 130 degrees
 		ENU = rotateOnZAxis(ENU, toRadians(130));
 
-		ROS_INFO("ENU: %f, %f, %f", ENU(0, 0), ENU(1, 0), ENU(2, 0));
+		//ROS_INFO("ENU: %f, %f, %f", ENU(0, 0), ENU(1, 0), ENU(2, 0));
 
 		messaggio.pose.pose.position.x = ENU(0, 0);
 		messaggio.pose.pose.position.y = ENU(1, 0);
@@ -144,6 +143,7 @@ public:
 
 		previous_ENU = ENU;
 
+
 		// // velocity
 		// double velocity_x = (ENU(0, 0) - previous_ENU_x) / 0.2;
 		// double velocity_y = (ENU(1, 0) - previous_ENU_y) / 0.2;
@@ -156,9 +156,6 @@ public:
 		// previous_ENU_x = ENU(0, 0);
 		// previous_ENU_y = ENU(1, 0);
 		// previous_ENU_z = ENU(2, 0);
-	}
-
-	void callback1(const ros::TimerEvent&) {
 		pub.publish(messaggio);
 	}
 
