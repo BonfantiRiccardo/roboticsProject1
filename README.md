@@ -1,16 +1,15 @@
-# Nota sulla visualizzazione
-Eseguire tutti i nodi e i tool grafici è sufficiente scrivere il comando:</br>
+# Notes on the visualization
+The only command to execute all nodes and GUI tools is the following:</br>
 `roslaunch first_project launch.launch`</br>
-Tuttavia, nel caso in cui non sia ancora stato eseguito il comando che avvia la riproduzione della bag, il tf_tree risulterà vuoto.
+The command does not play the bag, so if you only run the command you will see in the noVNC GUI an empty tf_tree and rviz.
 
-Il comando per eseguire la bag è il seguente:</br>
+The command to execute the bag is the following:</br>
 `rosbag play --clock robotics.bag`</br>
-Dopo che viene eseguito questo comando è possibile visualizzare in rviz i movimenti dei diversi reference frames uno rispetto all'altro.
-È inoltre possibile riconfigurare dinamicamente il reference frame del pointcloud da wheel_odom a gps_odom.
-Infine, per visualizzare il tf_tree potrebbe essere necessario "refreshare" l'interfaccia tramite il simbolo delle frecce in alto a sinistra.
+After this command is executed you will be able to see the different reference frames moving in rviz and the pointcloud data from the wheel_odom.</br>
+You can dinamically reconfigure the frame of the pointcloud data and change it between wheel_odom and gps_odom.</br>
+To visualize the tf tree you'll need to "refresh" it since when it was launched no one was publishing on the tf broadcaster (to refresh click the "spinning arrows" in the top left).
 
-## Divergenza tra gps odom e wheel odom
-Dovrebbero visualizzarsi gli assi del sistema di riferimento "world" fissi in centro alla griglia e altri due sistemi di riferimento
-("wheel_odom" e "gps_odom") che si muovono nel piano e divergono dopo un po' di tempo.
-In particolare ho notato che nel periodo 120s-230s della bag sono molto diversi e gps_odom sembra smettere di seguire il wheel_odom.
-Dopo i 230s tornano a muoversi in modo simile anche se in posizioni abbastanza diverse, dopodiché dai 350s in poi divergono un'altra volta.
+## Divergence between gps_odom and wheel_odom
+We noticed that the data published on the gps_odom topic and the one published on the wheel_odom topic diverges as the bag goes on.
+In particular we observed a strong difference in behaviour between seconds 120 and 230. After that, the movements seem to be coherent again, but there is a big offset in the positions.
+Finally, after 350 seconds we observed another big divergence until the end of the bag.
