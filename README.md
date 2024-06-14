@@ -1,4 +1,5 @@
-# Notes on the visualization
+# First Project for the "Robotics" course of Politecnico di Milano (Prof. Matteucci, Mentasti)
+## Notes on the visualization
 The only command to execute all nodes and GUI tools is the following:</br>
 `roslaunch first_project launch.launch`</br>
 The command does not play the bag, so if you only run the command you will see in the noVNC GUI an empty tf_tree and rviz.
@@ -13,3 +14,9 @@ To visualize the tf tree you'll need to "refresh" it since when it was launched 
 We noticed that the data published on the gps_odom topic and the one published on the wheel_odom topic diverges as the bag goes on.
 In particular we observed a strong difference in behaviour between seconds 120 and 230. After that, the movements seem to be coherent again, but there is a big offset in the positions.
 Finally, after 350 seconds we observed another big divergence until the end of the bag.
+
+## Team
+
+- [Edoardo](https://github.com/Janoww)
+- [Riccardo](https://github.com/BonfantiRiccardo)
+- [Alessio](https://github.com/BiscottiBiscottati)
