@@ -17,6 +17,6 @@ Finally, after 350 seconds we observed another big divergence until the end of t
 
 ## Team
 
-- [Edoardo](https://github.com/Janoww)
-- [Riccardo](https://github.com/BonfantiRiccardo)
-- [Alessio](https://github.com/BiscottiBiscottati)
+- [Edoardo Bergamo](https://github.com/Janoww)
+- [Riccardo Bonfanti](https://github.com/BonfantiRiccardo)
+- [Zining Chen](https://github.com/BiscottiBiscottati)
